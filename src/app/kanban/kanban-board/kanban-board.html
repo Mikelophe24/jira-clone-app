@@ -1,0 +1,44 @@
+<div class="board-container" cdkDropListGroup>
+  <!-- To Do Column -->
+  <div class="column">
+    <h2 class="column-title">To Do</h2>
+    <div
+      id="todo-list"
+      class="task-list"
+      cdkDropList
+      [cdkDropListData]="(todoTasks$ | async) || []"
+    >
+      <app-task-card *ngFor="let task of todoTasks$ | async" [task]="task" cdkDrag></app-task-card>
+    </div>
+  </div>
+
+  <!-- In Progress Column -->
+  <div class="column">
+    <h2 class="column-title">In Progress</h2>
+    <div
+      id="inprogress-list"
+      class="task-list"
+      cdkDropList
+      [cdkDropListData]="(inProgressTasks$ | async) || []"
+    >
+      <app-task-card
+        *ngFor="let task of inProgressTasks$ | async"
+        [task]="task"
+        cdkDrag
+      ></app-task-card>
+    </div>
+  </div>
+
+  <!-- Done Column -->
+  <div class="column">
+    <h2 class="column-title">Done</h2>
+    <div
+      id="done-list"
+      class="task-list"
+      cdkDropList
+      [cdkDropListData]="(doneTasks$ | async) || []"
+    >
+      <app-task-card *ngFor="let task of doneTasks$ | async" [task]="task" cdkDrag></app-task-card>
+    </div>
+  </div>
+</div>

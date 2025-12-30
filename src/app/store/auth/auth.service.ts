@@ -6,7 +6,7 @@ import {
   signOut,
 } from '@angular/fire/auth';
 import { inject } from '@angular/core';
-import { Firestore } from '@angular/fire/firestore';
+import { doc, Firestore, setDoc } from '@angular/fire/firestore';
 import { from } from 'rxjs';
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -24,5 +24,15 @@ export class AuthService {
 
   logout() {
     return from(signOut(this.auth));
+  }
+
+  createUserDocument(uid: string, email: string, name: string) {
+    const userDocRef = doc(this.fireStore, `users/${uid}`);
+    const userData = {
+      uid: uid,
+      email: email,
+      name: name,
+    };
+    return from(setDoc(userDocRef, userData));
   }
 }

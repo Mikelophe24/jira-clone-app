@@ -1,0 +1,33 @@
+<div class="auth-container">
+  <div class="auth-card">
+    <h2 class="auth-title">Welcome Back</h2>
+
+    <form class="auth-form" (ngSubmit)="onSubmit()" #loginForm="ngForm">
+      <div class="form-field">
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" [(ngModel)]="email" required />
+      </div>
+
+      <div class="form-field">
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" [(ngModel)]="password" required />
+      </div>
+
+      <!-- Display error messages from the store -->
+      <div *ngIf="error$ | async as error" class="auth-error">
+        {{ error }}
+      </div>
+
+      <!-- Disable button while loading or if form is invalid -->
+      <button
+        class="auth-button"
+        type="submit"
+        [disabled]="!loginForm.valid || (isLoading$ | async)"
+      >
+        {{ (isLoading$ | async) ? 'Logging in...' : 'Login' }}
+      </button>
+    </form>
+
+    <div class="auth-switch-link">Need an account? <a routerLink="/register">Register</a></div>
+  </div>
+</div>

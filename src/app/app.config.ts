@@ -10,6 +10,12 @@ import { localStorageSync } from 'ngrx-store-localstorage';
 import { provideFirestore, getFirestore } from '@angular/fire/firestore';
 import { routes } from './app.routes';
 import { enviroment } from '../environments/enviroment';
+import { AuthEffect } from './store/auth/auth.effect';
+import { authReducer } from './store/auth/auth.reducer';
+import { taskReducer } from './store/task/task.reducer';
+import { TaskEffect } from './store/task/task.effect';
+import { usersReducers } from './store/user/user.reducer';
+import { UsersEffects } from './store/user/user.effects';
 
 export function localStorageSyncReducer(reducer: ActionReducer<any>): ActionReducer<any> {
   return localStorageSync({ keys: ['auth'], rehydrate: true })(reducer);
@@ -24,10 +30,13 @@ export const appConfig: ApplicationConfig = {
     provideStore(
       {
         router: routerReducer,
+        auth: authReducer,
+        tasks: taskReducer,
+        user: usersReducers,
       },
       { metaReducers }
     ),
-    provideEffects([]),
+    provideEffects([AuthEffect, TaskEffect, UsersEffects]),
     provideStoreDevtools({}),
     provideRouterStore(),
     provideFirebaseApp(() => initializeApp(enviroment.firebase)),

@@ -1,0 +1,38 @@
+<div class="auth-container">
+  <div class="auth-card">
+    <h2 class="auth-title">Create Account</h2>
+
+    <form class="auth-form" (ngSubmit)="onSubmit()" #registerForm="ngForm">
+      <div class="form-field">
+        <label for="name">Full Name</label>
+        <input id="name" name="name" type="text" [(ngModel)]="name" required />
+      </div>
+
+      <div class="form-field">
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" [(ngModel)]="email" required />
+      </div>
+
+      <div class="form-field">
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" [(ngModel)]="password" required />
+      </div>
+
+      <!-- Display error messages -->
+      <div *ngIf="error$ | async as error" class="auth-error">
+        {{ error }}
+      </div>
+
+      <!-- Disable button -->
+      <button
+        class="auth-button"
+        type="submit"
+        [disabled]="!registerForm.valid || (isLoading$ | async)"
+      >
+        {{ (isLoading$ | async) ? 'Creating Account...' : 'Register' }}
+      </button>
+    </form>
+
+    <div class="auth-switch-link">Already have an account? <a routerLink="/login">Login</a></div>
+  </div>
+</div>
