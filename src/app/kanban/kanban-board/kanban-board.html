@@ -1,28 +1,211 @@
+<div class="board-header">
+  <div class="filter-toolbar">
+    <!-- Filter Button & Dropdown -->
+    <div class="filter-dropdown-container">
+      <button class="btn btn-filter" [class.active]="isFilterOpen" (click)="toggleFilterMenu()">
+        <!-- Icon Placeholder -->
+        <span class="filter-icon">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <line x1="4" y1="21" x2="4" y2="14"></line>
+            <line x1="4" y1="10" x2="4" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12" y2="3"></line>
+            <line x1="20" y1="21" x2="20" y2="16"></line>
+            <line x1="20" y1="12" x2="20" y2="3"></line>
+            <line x1="1" y1="14" x2="7" y2="14"></line>
+            <line x1="9" y1="8" x2="15" y2="8"></line>
+            <line x1="17" y1="16" x2="23" y2="16"></line>
+          </svg>
+        </span>
+        Filter
+        <span class="badge-count" *ngIf="countActiveFilters() > 0">{{ countActiveFilters() }}</span>
+      </button>
+
+      <button
+        class="btn btn-clear-text"
+        *ngIf="countActiveFilters() > 0"
+        (click)="clearAllFilters()"
+      >
+        Clear filters
+      </button>
+
+      <!-- POPUP MENU -->
+      <div class="filter-menu-popup" *ngIf="isFilterOpen">
+        <!-- Sidebar -->
+        <div class="filter-sidebar">
+          <div
+            class="sidebar-item"
+            [class.active]="activeFilterCategory === 'status'"
+            (click)="setFilterCategory('status')"
+          >
+            Status
+            <span class="count-bubble" *ngIf="(statusFilterSubject | async)?.length">{{
+              (statusFilterSubject | async)?.length
+            }}</span>
+          </div>
+          <div
+            class="sidebar-item"
+            [class.active]="activeFilterCategory === 'assignee'"
+            (click)="setFilterCategory('assignee')"
+          >
+            Assignee
+            <span class="count-bubble" *ngIf="(assigneeFilterSubject | async)?.length">{{
+              (assigneeFilterSubject | async)?.length
+            }}</span>
+          </div>
+          <div
+            class="sidebar-item"
+            [class.active]="activeFilterCategory === 'priority'"
+            (click)="setFilterCategory('priority')"
+          >
+            Priority
+            <span class="count-bubble" *ngIf="(priorityFilterSubject | async)?.length">{{
+              (priorityFilterSubject | async)?.length
+            }}</span>
+          </div>
+        </div>
+
+        <!-- Right Content -->
+        <div class="filter-content">
+          <!-- STATUS FILTER -->
+          <div *ngIf="activeFilterCategory === 'status'" class="filter-section">
+            <div class="filter-search-input-wrapper">
+              <span class="search-icon">🔍</span>
+              <input type="text" placeholder="Search status" />
+            </div>
+            <div class="options-list">
+              <div
+                class="checkbox-option"
+                *ngFor="let status of statuses"
+                (click)="toggleSelection(statusFilterSubject, status)"
+              >
+                <input
+                  type="checkbox"
+                  [checked]="isSelected(statusFilterSubject, status)"
+                  readonly
+                />
+                <span class="option-label uppercase-label">{{ status }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- ASSIGNEE FILTER -->
+          <div *ngIf="activeFilterCategory === 'assignee'" class="filter-section">
+            <div class="filter-search-input-wrapper">
+              <span class="search-icon">🔍</span>
+              <input type="text" placeholder="Search assignees" />
+            </div>
+            <div class="options-list">
+              <div
+                class="checkbox-option"
+                (click)="toggleSelection(assigneeFilterSubject, 'unassigned')"
+              >
+                <input
+                  type="checkbox"
+                  [checked]="isSelected(assigneeFilterSubject, 'unassigned')"
+                  readonly
+                />
+                <span class="option-label">Unassigned</span>
+              </div>
+              <div
+                class="checkbox-option"
+                *ngFor="let user of users$ | async"
+                (click)="toggleSelection(assigneeFilterSubject, user.uid)"
+              >
+                <input
+                  type="checkbox"
+                  [checked]="isSelected(assigneeFilterSubject, user.uid)"
+                  readonly
+                />
+                <span class="option-label">{{ user.name }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- PRIORTITY FILTER -->
+          <div *ngIf="activeFilterCategory === 'priority'" class="filter-section">
+            <div class="filter-search-input-wrapper">
+              <span class="search-icon">🔍</span>
+              <input type="text" placeholder="Search priority" />
+            </div>
+            <div class="options-list">
+              <div
+                class="checkbox-option"
+                *ngFor="let p of priorities"
+                (click)="toggleSelection(priorityFilterSubject, p)"
+              >
+                <input type="checkbox" [checked]="isSelected(priorityFilterSubject, p)" readonly />
+                <span class="option-label">{{ p }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search Input -->
+    <div class="global-search-wrapper">
+      <input
+        type="text"
+        placeholder="Search tasks..."
+        [ngModel]="searchTerm$ | async"
+        (ngModelChange)="searchTermSubject.next($event)"
+        class="search-input"
+      />
+    </div>
+
+    <!-- Create Button -->
+    <button class="btn btn-primary create-btn" (click)="openModal()">+ Create Task</button>
+  </div>
+</div>
+
+<!-- Board Container (Existing) -->
 <div class="board-container" cdkDropListGroup>
   <!-- To Do Column -->
   <div class="column">
-    <h2 class="column-title">To Do</h2>
+    <h2 class="column-title">
+      To Do <span class="task-count">{{ (todoTasks$ | async)?.length || 0 }}</span>
+    </h2>
     <div
       id="todo-list"
       class="task-list"
       cdkDropList
       [cdkDropListData]="(todoTasks$ | async) || []"
+      (cdkDropListDropped)="onDrop($event)"
     >
-      <app-task-card *ngFor="let task of todoTasks$ | async" [task]="task" cdkDrag></app-task-card>
+      <app-task-card
+        *ngFor="let task of todoTasks$ | async; trackBy: trackByTask"
+        (edit)="openModal(task)"
+        (delete)="onDeleteTask(task.id)"
+        [task]="task"
+        cdkDrag
+      ></app-task-card>
     </div>
   </div>
 
   <!-- In Progress Column -->
   <div class="column">
-    <h2 class="column-title">In Progress</h2>
+    <h2 class="column-title">
+      In Progress <span class="task-count">{{ (inProgressTasks$ | async)?.length || 0 }}</span>
+    </h2>
     <div
       id="inprogress-list"
       class="task-list"
       cdkDropList
       [cdkDropListData]="(inProgressTasks$ | async) || []"
+      (cdkDropListDropped)="onDrop($event)"
     >
       <app-task-card
-        *ngFor="let task of inProgressTasks$ | async"
+        *ngFor="let task of inProgressTasks$ | async; trackBy: trackByTask"
+        (edit)="openModal(task)"
+        (delete)="onDeleteTask(task.id)"
         [task]="task"
         cdkDrag
       ></app-task-card>
@@ -31,14 +214,29 @@
 
   <!-- Done Column -->
   <div class="column">
-    <h2 class="column-title">Done</h2>
+    <h2 class="column-title">
+      Done <span class="task-count">{{ (doneTasks$ | async)?.length || 0 }}</span>
+    </h2>
     <div
       id="done-list"
       class="task-list"
       cdkDropList
       [cdkDropListData]="(doneTasks$ | async) || []"
+      (cdkDropListDropped)="onDrop($event)"
     >
-      <app-task-card *ngFor="let task of doneTasks$ | async" [task]="task" cdkDrag></app-task-card>
+      <app-task-card
+        *ngFor="let task of doneTasks$ | async; trackBy: trackByTask"
+        (edit)="openModal(task)"
+        (delete)="onDeleteTask(task.id)"
+        [task]="task"
+        cdkDrag
+      ></app-task-card>
     </div>
   </div>
 </div>
+
+<app-add-edit-task
+  *ngIf="isModalOpen"
+  [task]="this.editingTask"
+  (close)="closeModal()"
+></app-add-edit-task>

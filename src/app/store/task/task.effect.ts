@@ -16,8 +16,14 @@ export class TaskEffect {
       ofType(TaskActions.loadTasks),
       switchMap(() =>
         this.taskService.getTasks().pipe(
-          map((tasks) => TaskActions.loadTasksSuccess({ tasks })),
-          catchError((error) => of(TaskActions.loadTasksFailure({ error: error.message })))
+          map((tasks) => {
+            console.log('Tasks loaded from Firebase:', tasks);
+            return TaskActions.loadTasksSuccess({ tasks });
+          }),
+          catchError((error) => {
+            console.error('Failed to load tasks:', error);
+            return of(TaskActions.loadTasksFailure({ error: error.message }));
+          })
         )
       )
     )

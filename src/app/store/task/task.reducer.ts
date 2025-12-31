@@ -1,8 +1,8 @@
 import { createReducer, on } from '@ngrx/store';
-import { TaskState } from './task.model';
+import { TasksState } from './task.model';
 import { TaskActions } from './task.actions';
 
-export const initialState: TaskState = {
+export const initialState: TasksState = {
   tasks: [],
   isLoading: false,
   error: null,
@@ -35,9 +35,8 @@ export const taskReducer = createReducer(
     isLoading: true,
     error: null,
   })),
-  on(TaskActions.addTaskSuccess, (state, { task }) => ({
+  on(TaskActions.addTaskSuccess, (state) => ({
     ...state,
-    tasks: [...state.tasks, task],
     isLoading: false,
     error: null,
   })),
@@ -48,14 +47,14 @@ export const taskReducer = createReducer(
   })),
 
   // Update Task
-  on(TaskActions.updateTask, (state) => ({
+  on(TaskActions.updateTask, (state, { task }) => ({
     ...state,
+    tasks: state.tasks.map((t) => (t.id === task.id ? { ...t, ...task } : t)),
     isLoading: true,
     error: null,
   })),
-  on(TaskActions.updateTaskSuccess, (state, { task }) => ({
+  on(TaskActions.updateTaskSuccess, (state) => ({
     ...state,
-    tasks: state.tasks.map((t) => (t.id === task.id ? { ...t, ...task } : t)),
     isLoading: false,
     error: null,
   })),
@@ -71,9 +70,8 @@ export const taskReducer = createReducer(
     isLoading: true,
     error: null,
   })),
-  on(TaskActions.deleteTaskSuccess, (state, { taskId }) => ({
+  on(TaskActions.deleteTaskSuccess, (state) => ({
     ...state,
-    tasks: state.tasks.filter((t) => t.id !== taskId),
     isLoading: false,
     error: null,
   })),

@@ -1,4 +1,19 @@
-<div class="card-container">
+<div class="card-container" (click)="edit.emit()">
   <h3 class="card-title">{{ task.title }}</h3>
   <p class="card-description">{{ task.description }}</p>
+
+  <div class="card-footer">
+    <div class="assignee-info">
+      <div class="avatar" [title]="task.assigneeName">
+        {{ task.assigneeName }}
+      </div>
+    </div>
+    <button
+      class="delete-btn"
+      title="Delete Task"
+      (click)="$event.stopPropagation(); delete.emit()"
+    >
+      ×
+    </button>
+  </div>
 </div>

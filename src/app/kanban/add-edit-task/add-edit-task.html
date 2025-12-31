@@ -1,1 +1,88 @@
-<p>add-edit-task works!</p>
+<div class="modal-backdrop" (click)="onClose()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <header class="modal-header">
+      <h2>{{ isEditMode ? 'Edit Task' : 'Create New Task' }}</h2>
+      <button class="close-btn" (click)="onClose()">×</button>
+    </header>
+
+    <form (ngSubmit)="onSubmit()" #taskForm="ngForm" class="modal-body">
+      <div class="form-field">
+        <label for="title">Title</label>
+        <input
+          id="title"
+          name="title"
+          type="text"
+          [(ngModel)]="taskData.title"
+          required
+          placeholder="e.g., Implement login page"
+        />
+      </div>
+
+      <div class="form-field">
+        <label for="description">Description</label>
+        <textarea
+          id="description"
+          name="description"
+          [(ngModel)]="taskData.description"
+          rows="4"
+          placeholder="Add a more detailed description..."
+        ></textarea>
+      </div>
+
+      <div class="form-field">
+        <label for="assignee">Assign To</label>
+        <select id="assignee" name="assignee" [(ngModel)]="taskData.assigneeId">
+          <option [ngValue]="null">-- Unassigned --</option>
+          <option *ngFor="let user of users$ | async" [value]="user.uid">
+            {{ user.name }}
+          </option>
+        </select>
+      </div>
+
+      <div *ngIf="isEditMode" class="form-field">
+        <label for="status">Status</label>
+        <select id="status" name="status" [(ngModel)]="taskData.status">
+          <option value="To Do">To Do</option>
+          <option value="In Progress">In Progress</option>
+          <option value="Done">Done</option>
+        </select>
+      </div>
+
+      <footer class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="onClose()">Cancel</button>
+        <button type="submit" class="btn btn-primary" [disabled]="!taskForm.form.valid">
+          {{ isEditMode ? 'Save Changes' : 'Create Task' }}
+        </button>
+      </footer>
+    </form>
+
+    <div class="comments-section" *ngIf="task">
+      <div *ngIf="comments$ | async as comments">
+        <h3 class="comments-title">
+          Comments <span class="comment-count">{{ comments.length }}</span>
+        </h3>
+        <div class="comments-list">
+          <div *ngFor="let comment of comments" class="comment">
+            <strong class="comment-author">{{ comment.authorname }}</strong>
+            <p class="comment-content">{{ comment.content }}</p>
+            <span class="comment-date">
+              {{
+              comment.createdAt?.toDate?.()
+                ? (comment.createdAt.toDate() | date:'short')
+                : 'Vừa xong'
+              }}
+            </span>
+          </div>
+        </div>
+      </div>
+      <div class="comment-form">
+        <textarea
+          [(ngModel)]="newComment"
+          name="newComment"
+          placeholder="Add a comment..."
+        ></textarea>
+        <button type="button" (click)="onAddComment()" class="btn btn-primary">Submit</button>
+      </div>
+    </div>
+  </div>
+</div>
