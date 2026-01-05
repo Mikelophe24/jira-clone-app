@@ -7,7 +7,7 @@ import { TaskActions } from './task.actions';
 @Injectable({
   providedIn: 'root',
 })
-export class TaskEffect {
+export class TaskEffects {
   private action$ = inject(Actions);
   private taskService = inject(TaskService);
 
@@ -29,9 +29,6 @@ export class TaskEffect {
     )
   );
 
-  //addEffectt
-
-  //addEffect
   addtask$ = createEffect(() =>
     this.action$.pipe(
       ofType(TaskActions.addTask),
@@ -48,7 +45,6 @@ export class TaskEffect {
     )
   );
 
-  //update
   updateTask$ = createEffect(() =>
     this.action$.pipe(
       ofType(TaskActions.updateTask),
@@ -61,7 +57,6 @@ export class TaskEffect {
     )
   );
 
-  //delete
   deleteTask$ = createEffect(() =>
     this.action$.pipe(
       ofType(TaskActions.deleteTask),

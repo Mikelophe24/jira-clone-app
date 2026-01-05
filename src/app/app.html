@@ -1,7 +1,36 @@
 <nav class="navbar">
-  <h1>NgRx Jira Clone</h1>
-  <!-- logout -->
-  <button class="logout-button" *ngIf="isLoggedIn$ | async" (click)="onLogout()">Logout</button>
+  <div class="navbar-left">
+    <h1 class="logo-text">NgRx Jira</h1>
+  </div>
+
+  <div class="navbar-right" *ngIf="isLoggedIn$ | async">
+    <div class="user-profile" *ngIf="currentUserProfile$ | async as user">
+      <div class="user-info">
+        <span class="user-name">{{ user?.name }}</span>
+        <span class="user-email">{{ user?.email }}</span>
+      </div>
+      <div class="user-avatar" [title]="user?.name">
+        {{ user?.name ? user.name.charAt(0).toUpperCase() : 'U' }}
+      </div>
+    </div>
+    <button class="logout-button" (click)="onLogout()">
+      <svg
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+        <polyline points="16 17 21 12 16 7"></polyline>
+        <line x1="21" y1="12" x2="9" y2="12"></line>
+      </svg>
+      Logout
+    </button>
+  </div>
 </nav>
 
 <main>

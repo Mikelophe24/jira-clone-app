@@ -2,17 +2,16 @@ import { inject, Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { AuthService } from './auth.service';
-import { AuthActions } from './auth.action';
+import { AuthActions } from './auth.actions';
 import { map, switchMap, catchError, mergeMap, tap } from 'rxjs';
 import { of } from 'rxjs';
 
 @Injectable()
-export class AuthEffect {
+export class AuthEffects {
   private actions$ = inject(Actions);
   private authService = inject(AuthService);
   private router = inject(Router);
 
-  //login
   login$ = createEffect(() =>
     this.actions$.pipe(
       ofType(AuthActions.login),
@@ -36,7 +35,6 @@ export class AuthEffect {
     )
   );
 
-  //register
   register$ = createEffect(() =>
     this.actions$.pipe(
       ofType(AuthActions.register),
@@ -61,7 +59,6 @@ export class AuthEffect {
     )
   );
 
-  //logout
   logout$ = createEffect(() =>
     this.actions$.pipe(
       ofType(AuthActions.logout),
@@ -74,7 +71,6 @@ export class AuthEffect {
     )
   );
 
-  //authSuccess
   authSuccess$ = createEffect(
     () =>
       this.actions$.pipe(

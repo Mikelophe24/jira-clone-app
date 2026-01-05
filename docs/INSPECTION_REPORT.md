@@ -269,7 +269,7 @@ interface Task {
   title: string;
   description: string;
   status: 'To Do' | 'In Progress' | 'Done';
-  reportedId: string;
+  reporterId: string;
   assigneeId?: string;
 }
 
@@ -383,7 +383,7 @@ ngrx-jira-clone-app-7804a/
         ├── title: string
         ├── description: string
         ├── status: 'To Do' | 'In Progress' | 'Done'
-        ├── reportedId: string
+        ├── reporterId: string
         └── assigneeId?: string
 ```
 

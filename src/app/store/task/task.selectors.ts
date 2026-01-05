@@ -15,9 +15,11 @@ export const selectTaskWithAssigneeInfo = createSelector(
   (tasks, users): TaskWithAssignee[] => {
     const usersMap = new Map(users.map((user) => [user.uid, user.name]));
 
-    return tasks.map((task) => ({
+    return tasks.map((task, index) => ({
       ...task,
+      taskNumber: task.taskNumber || index + 1,
       assigneeName: task.assigneeId ? usersMap.get(task.assigneeId) : undefined,
+      reporterName: task.reporterId ? usersMap.get(task.reporterId) : 'Unknown',
     }));
   }
 );

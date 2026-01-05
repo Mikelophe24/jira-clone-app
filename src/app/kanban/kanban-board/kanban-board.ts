@@ -20,6 +20,7 @@ import { User } from '../../store/user/user.model';
 import { FormsModule } from '@angular/forms';
 @Component({
   selector: 'app-kanban-board',
+  standalone: true,
   imports: [TaskCard, DragDropModule, CommonModule, AddEditTaskComponent, FormsModule],
   templateUrl: './kanban-board.html',
   styleUrl: './kanban-board.scss',
@@ -176,7 +177,6 @@ export class KanbanBoard implements OnInit {
     this.store.dispatch(TaskActions.loadTasks());
   }
 
-  //open Modal
   openModal(task: Task | null = null) {
     this.editingTask = task;
     this.isModalOpen = true;
@@ -185,8 +185,6 @@ export class KanbanBoard implements OnInit {
     this.isModalOpen = false;
     this.editingTask = null;
   }
-
-  //delete task
 
   onDeleteTask(taskId: string) {
     if (confirm('Are you sure you want to delete this task?')) {
@@ -197,7 +195,6 @@ export class KanbanBoard implements OnInit {
   setFilter(mode: 'all' | 'my') {
     this.filterModeSubject.next(mode);
   }
-  //onDrop
 
   onDrop(event: CdkDragDrop<TaskWithAssignee[]>) {
     if (event.previousContainer === event.container) return;

@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { selectAuthState } from '../../store/auth/auth.selector';
-import { AuthActions } from '../../store/auth/auth.action';
+import { AuthActions } from '../../store/auth/auth.actions';
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';

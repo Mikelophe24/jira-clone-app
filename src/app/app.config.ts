@@ -9,11 +9,11 @@ import { provideAuth, getAuth } from '@angular/fire/auth';
 import { localStorageSync } from 'ngrx-store-localstorage';
 import { provideFirestore, getFirestore } from '@angular/fire/firestore';
 import { routes } from './app.routes';
-import { enviroment } from '../environments/enviroment';
-import { AuthEffect } from './store/auth/auth.effect';
+import { environment } from '../environments/environment';
+import { AuthEffects } from './store/auth/auth.effects';
 import { authReducer } from './store/auth/auth.reducer';
 import { taskReducer } from './store/task/task.reducer';
-import { TaskEffect } from './store/task/task.effect';
+import { TaskEffects } from './store/task/task.effects';
 import { usersReducers } from './store/user/user.reducer';
 import { UsersEffects } from './store/user/user.effects';
 import { commentsReducer } from './store/comments/comments.reducer';
@@ -42,10 +42,10 @@ export const appConfig: ApplicationConfig = {
       },
       { metaReducers }
     ),
-    provideEffects([AuthEffect, TaskEffect, UsersEffects, CommentsEffects]),
+    provideEffects([AuthEffects, TaskEffects, UsersEffects, CommentsEffects]),
     provideStoreDevtools({}),
     provideRouterStore(),
-    provideFirebaseApp(() => initializeApp(enviroment.firebase)),
+    provideFirebaseApp(() => initializeApp(environment.firebase)),
     provideAuth(() => getAuth()),
     provideFirestore(() => getFirestore()),
   ],

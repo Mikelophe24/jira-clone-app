@@ -3,9 +3,11 @@ export interface Task {
   title: string;
   description: string;
   status: 'To Do' | 'In Progress' | 'Done';
-  reportedId: string;
+  reporterId: string;
   assigneeId?: string;
   priority?: 'High' | 'Medium' | 'Low';
+  dueDate?: string;
+  taskNumber?: number;
 }
 
 export interface TasksState {
@@ -17,4 +19,5 @@ export interface TasksState {
 //
 export interface TaskWithAssignee extends Task {
   assigneeName?: string;
+  reporterName?: string;
 }

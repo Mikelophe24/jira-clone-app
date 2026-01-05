@@ -2,7 +2,7 @@ import { Component, inject } from '@angular/core';
 import { map, Observable } from 'rxjs';
 import { selectAuthState } from '../../store/auth/auth.selector';
 import { Store } from '@ngrx/store';
-import { AuthActions } from '../../store/auth/auth.action';
+import { AuthActions } from '../../store/auth/auth.actions';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';

@@ -1,3 +1,40 @@
+/* Breadcrumbs */
+.breadcrumb-container {
+  padding: 1.5rem 1.5rem 0.5rem 1.5rem;
+  background-color: #ffffff;
+
+  .breadcrumbs {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 0.5rem;
+    font-size: 0.85rem;
+    color: #5e6c84;
+
+    .breadcrumb-item {
+      cursor: pointer;
+      &:hover {
+        text-decoration: underline;
+      }
+      &.active {
+        cursor: default;
+        text-decoration: none;
+      }
+    }
+
+    .separator {
+      color: #7a869a;
+    }
+  }
+
+  .page-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #172b4d;
+    margin: 0;
+  }
+}
+
 /* Base Layout */
 .board-container {
   display: grid;

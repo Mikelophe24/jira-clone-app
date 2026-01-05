@@ -39,6 +39,30 @@
         </select>
       </div>
 
+      <div class="form-field" *ngIf="isEditMode">
+        <label>Reporter</label>
+        <div class="reporter-display">
+          <div class="avatar-small">
+            {{ task?.reporterName ? task?.reporterName?.charAt(0)?.toUpperCase() : '?' }}
+          </div>
+          <span>{{ task?.reporterName || 'Unknown' }}</span>
+        </div>
+      </div>
+
+      <div class="form-field">
+        <label for="dueDate">Due Date</label>
+        <input id="dueDate" name="dueDate" type="date" [(ngModel)]="taskData.dueDate" />
+      </div>
+
+      <div class="form-field">
+        <label for="priority">Priority</label>
+        <select id="priority" name="priority" [(ngModel)]="taskData.priority">
+          <option value="High">High</option>
+          <option value="Medium">Medium</option>
+          <option value="Low">Low</option>
+        </select>
+      </div>
+
       <div *ngIf="isEditMode" class="form-field">
         <label for="status">Status</label>
         <select id="status" name="status" [(ngModel)]="taskData.status">
@@ -65,13 +89,6 @@
           <div *ngFor="let comment of comments" class="comment">
             <strong class="comment-author">{{ comment.authorname }}</strong>
             <p class="comment-content">{{ comment.content }}</p>
-            <span class="comment-date">
-              {{
-              comment.createdAt?.toDate?.()
-                ? (comment.createdAt.toDate() | date:'short')
-                : 'Vừa xong'
-              }}
-            </span>
           </div>
         </div>
       </div>

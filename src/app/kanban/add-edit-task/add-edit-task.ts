@@ -5,7 +5,7 @@ import { filter, first, Observable, of } from 'rxjs';
 import { User } from '../../store/user/user.model';
 import { selectAllUsers } from '../../store/user/user.selectors';
 import { UserActions } from '../../store/user/user.actions';
-import { Task } from '../../store/task/task.model';
+import { Task, TaskWithAssignee } from '../../store/task/task.model';
 import { TaskActions } from '../../store/task/task.actions';
 import { selectCurrentUserId } from '../../store/auth/auth.selector';
 import { FormsModule } from '@angular/forms';
@@ -23,24 +23,23 @@ import { CommentsActions } from '../../store/comments/comments.actions';
 export class AddEditTaskComponent implements OnInit {
   private store = inject(Store);
 
-  @Input() task?: Task | null;
-  //add
-
-  //edit
+  @Input() task?: TaskWithAssignee | null;
   @Output() close = new EventEmitter<void>();
-
-  //form
 
   taskData: {
     title: string;
     description: string;
     status: 'To Do' | 'In Progress' | 'Done';
     assigneeId: string | null;
+    priority: 'High' | 'Medium' | 'Low';
+    dueDate: string;
   } = {
     title: '',
     description: '',
     status: 'To Do',
     assigneeId: null,
+    priority: 'Medium',
+    dueDate: '',
   };
 
   isEditMode = false;
@@ -53,11 +52,6 @@ export class AddEditTaskComponent implements OnInit {
   ngOnInit(): void {
     this.store.dispatch(UserActions.loadUsers());
 
-    // Debug: Log users data
-    this.users$.subscribe((users) => {
-      console.log('Users loaded:', users);
-    });
-
     if (this.task) {
       this.isEditMode = true;
       this.taskData = {
@@ -65,6 +59,8 @@ export class AddEditTaskComponent implements OnInit {
         description: this.task.description,
         status: this.task.status,
         assigneeId: this.task.assigneeId || null,
+        priority: this.task.priority || 'Medium',
+        dueDate: this.task.dueDate || '',
       };
       this.store.dispatch(CommentsActions.loadComments({ taskId: this.task.id }));
     } else {
@@ -77,6 +73,8 @@ export class AddEditTaskComponent implements OnInit {
       title: this.taskData.title,
       description: this.taskData.description,
       status: this.taskData.status,
+      priority: this.taskData.priority,
+      dueDate: this.taskData.dueDate,
       assigneeId: this.taskData.assigneeId === null ? undefined : this.taskData.assigneeId,
     };
 
@@ -94,18 +92,16 @@ export class AddEditTaskComponent implements OnInit {
           filter((uid) => !!uid),
           first()
         )
-        .subscribe((reportedId) => {
+        .subscribe((reporterId) => {
           this.store.dispatch(
             TaskActions.addTask({
-              taskData: { ...payload, reportedId: reportedId! },
+              taskData: { ...payload, reporterId: reporterId! },
             })
           );
         });
     }
 
     this.onClose();
-    //add
-    //edit
   }
 
   onClose(): void {
