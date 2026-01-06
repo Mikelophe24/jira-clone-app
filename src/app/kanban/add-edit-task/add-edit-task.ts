@@ -13,6 +13,7 @@ import { CommonModule } from '@angular/common';
 import { CommentWithAuthName } from '../../store/comments/comments.model';
 import { selectCommentsWithAuthorDetails } from '../../store/comments/comments.selectors';
 import { CommentsActions } from '../../store/comments/comments.actions';
+import { selectProjectMembers } from '../../store/project/project.selectors';
 
 @Component({
   selector: 'app-add-edit-task',
@@ -24,6 +25,7 @@ export class AddEditTaskComponent implements OnInit {
   private store = inject(Store);
 
   @Input() task?: TaskWithAssignee | null;
+  @Input() projectId?: string | null; // Project ID from parent
   @Output() close = new EventEmitter<void>();
 
   taskData: {
@@ -44,13 +46,20 @@ export class AddEditTaskComponent implements OnInit {
 
   isEditMode = false;
 
-  users$: Observable<User[]> = this.store.select(selectAllUsers);
+  users$: Observable<User[]> = of([]);
 
   comments$: Observable<CommentWithAuthName[]> = this.store.select(selectCommentsWithAuthorDetails);
   newComment = '';
 
   ngOnInit(): void {
     this.store.dispatch(UserActions.loadUsers());
+
+    // Filter users to show only project members
+    if (this.projectId) {
+      this.users$ = this.store.select(selectProjectMembers(this.projectId));
+    } else {
+      this.users$ = this.store.select(selectAllUsers);
+    }
 
     if (this.task) {
       this.isEditMode = true;
@@ -95,7 +104,12 @@ export class AddEditTaskComponent implements OnInit {
         .subscribe((reporterId) => {
           this.store.dispatch(
             TaskActions.addTask({
-              taskData: { ...payload, reporterId: reporterId! },
+              taskData: {
+                ...payload,
+                reporterId: reporterId!,
+                order: Date.now(), // New tasks appear at the bottom
+                projectId: this.projectId || undefined, // Link to current project
+              },
             })
           );
         });

@@ -1,12 +1,34 @@
 <div class="breadcrumb-container">
   <nav class="breadcrumbs">
-    <span class="breadcrumb-item">Projects</span>
+    <span class="breadcrumb-item clickable" (click)="goToProjects()">Projects</span>
     <span class="separator">/</span>
-    <span class="breadcrumb-item">My Jira Project</span>
+    <span class="breadcrumb-item" *ngIf="currentProject$ | async as project">
+      {{ project.name }}
+    </span>
     <span class="separator">/</span>
-    <span class="breadcrumb-item active">Kanban Board</span>
+    <span class="breadcrumb-item active">Board</span>
   </nav>
-  <h1 class="page-title">Kanban Board</h1>
+  <div class="header-actions">
+    <h1 class="page-title" *ngIf="currentProject$ | async as project">
+      {{ project.name }}
+    </h1>
+    <button class="btn btn-secondary" (click)="goToProjectSettings()" title="Project Settings">
+      <svg
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+      >
+        <circle cx="12" cy="12" r="3" />
+        <path
+          d="M12 1v6m0 6v6M5.64 5.64l4.24 4.24m4.24 4.24l4.24 4.24M1 12h6m6 0h6M5.64 18.36l4.24-4.24m4.24-4.24l4.24-4.24"
+        />
+      </svg>
+      Settings
+    </button>
+  </div>
 </div>
 
 <div class="board-header">
@@ -249,5 +271,6 @@
 <app-add-edit-task
   *ngIf="isModalOpen"
   [task]="this.editingTask"
+  [projectId]="projectId$ | async"
   (close)="closeModal()"
 ></app-add-edit-task>

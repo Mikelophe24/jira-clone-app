@@ -1,0 +1,188 @@
+<div class="settings-container" *ngIf="project$ | async as project">
+  <div class="settings-header">
+    <button class="back-button" (click)="goBack()">
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+      >
+        <path d="M19 12H5M12 19l-7-7 7-7" />
+      </svg>
+      Back to Projects
+    </button>
+    <div class="header-content">
+      <h1>{{ project.name }}</h1>
+      <p class="subtitle">Project Settings</p>
+    </div>
+    <button class="btn btn-primary" (click)="goToBoard()">
+      <svg
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+      >
+        <rect x="3" y="3" width="7" height="7" />
+        <rect x="14" y="3" width="7" height="7" />
+        <rect x="14" y="14" width="7" height="7" />
+        <rect x="3" y="14" width="7" height="7" />
+      </svg>
+      Go to Board
+    </button>
+  </div>
+
+  <div class="settings-content">
+    <!-- Project Info Section -->
+    <section class="settings-section">
+      <h2 class="section-title">Project Information</h2>
+      <div class="info-grid">
+        <div class="info-item">
+          <label>Project Name</label>
+          <div class="value">{{ project.name }}</div>
+        </div>
+        <div class="info-item">
+          <label>Description</label>
+          <div class="value">{{ project.description || 'No description' }}</div>
+        </div>
+        <div class="info-item">
+          <label>Created</label>
+          <div class="value">{{ project.createdAt | date : 'medium' }}</div>
+        </div>
+        <div class="info-item">
+          <label>Last Updated</label>
+          <div class="value">{{ project.updatedAt | date : 'medium' }}</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Members Section -->
+    <section class="settings-section">
+      <h2 class="section-title">
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+        </svg>
+        Team Members
+      </h2>
+
+      <!-- Add Member Form (Only for owners) -->
+      <div class="add-member-form" *ngIf="isOwner$ | async">
+        <div class="form-row">
+          <input
+            type="email"
+            [(ngModel)]="newMemberEmail"
+            placeholder="Enter member's email address"
+            class="email-input"
+            (keyup.enter)="addMember()"
+          />
+          <button class="btn btn-primary" (click)="addMember()" [disabled]="!newMemberEmail.trim()">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            Add Member
+          </button>
+        </div>
+        <p class="helper-text">Add team members by entering their email address</p>
+      </div>
+
+      <!-- Members List -->
+      <div class="members-list">
+        <div class="member-card" *ngFor="let member of members$ | async">
+          <div class="member-avatar">
+            {{ member.name ? member.name.charAt(0).toUpperCase() : 'U' }}
+          </div>
+          <div class="member-info">
+            <div class="member-name">{{ member.name }}</div>
+            <div class="member-email">{{ member.email }}</div>
+          </div>
+          <div class="member-actions">
+            <span class="role-badge" *ngIf="member.uid === project.ownerId">Owner</span>
+            <span class="role-badge member" *ngIf="member.uid !== project.ownerId">Member</span>
+            <button
+              *ngIf="(isOwner$ | async) && member.uid !== project.ownerId"
+              class="remove-button"
+              (click)="removeMember(member.uid)"
+              title="Remove member"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Danger Zone (Only for owners) -->
+    <section class="settings-section danger-zone" *ngIf="isOwner$ | async">
+      <h2 class="section-title">
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path
+            d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
+          />
+          <line x1="12" y1="9" x2="12" y2="13" />
+          <line x1="12" y1="17" x2="12.01" y2="17" />
+        </svg>
+        Danger Zone
+      </h2>
+      <div class="danger-content">
+        <div class="danger-info">
+          <h3>Delete this project</h3>
+          <p>Once you delete a project, there is no going back. Please be certain.</p>
+        </div>
+        <button class="btn btn-danger" (click)="deleteProject()">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <polyline points="3 6 5 6 21 6" />
+            <path
+              d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+            />
+          </svg>
+          Delete Project
+        </button>
+      </div>
+    </section>
+  </div>
+</div>

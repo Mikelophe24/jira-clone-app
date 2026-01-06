@@ -1,5 +1,6 @@
 export interface Task {
   id: string;
+  projectId?: string; // Link to project (optional for backward compatibility)
   title: string;
   description: string;
   status: 'To Do' | 'In Progress' | 'Done';
@@ -8,6 +9,7 @@ export interface Task {
   priority?: 'High' | 'Medium' | 'Low';
   dueDate?: string;
   taskNumber?: number;
+  order?: number; // For ordering tasks within a column (fractional indexing)
 }
 
 export interface TasksState {

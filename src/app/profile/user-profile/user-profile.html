@@ -1,0 +1,52 @@
+<div class="user-profile-container" *ngIf="currentUser$ | async as user">
+  <div class="profile-header">
+    <button class="back-button" (click)="goBack()">
+      <span class="back-icon">←</span> Back to Projects
+    </button>
+    <h1>User Profile</h1>
+  </div>
+
+  <div class="profile-content">
+    <div class="profile-card">
+      <div class="profile-avatar">
+       
+      </div>
+
+      <div class="profile-info">
+        <div class="info-row">
+          <label>Email</label>
+          <p>{{ user.email }}</p>
+        </div>
+
+        <div class="info-row">
+          <label>Name</label>
+          <div *ngIf="!isEditing">
+            <p>{{ user.name }}</p>
+            <button class="edit-button" (click)="toggleEdit()">Edit</button>
+          </div>
+          <div *ngIf="isEditing" class="edit-form">
+            <input
+              type="text"
+              [(ngModel)]="editedName"
+              class="name-input"
+              placeholder="Enter your name"
+            />
+            <div class="edit-actions">
+              <button class="save-button" (click)="saveProfile()">Save</button>
+              <button class="cancel-button" (click)="cancelEdit()">Cancel</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="info-row">
+          <label>User ID</label>
+          <p class="user-id">{{ user.uid }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="loading-container" *ngIf="!(currentUser$ | async)">
+  <p>Loading profile...</p>
+</div>

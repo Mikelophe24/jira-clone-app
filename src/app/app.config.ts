@@ -18,6 +18,8 @@ import { usersReducers } from './store/user/user.reducer';
 import { UsersEffects } from './store/user/user.effects';
 import { commentsReducer } from './store/comments/comments.reducer';
 import { CommentsEffects } from './store/comments/comments.effects';
+import { projectReducer } from './store/project/project.reducer';
+import { ProjectEffects } from './store/project/project.effects';
 
 export function localStorageSyncReducer(reducer: ActionReducer<any>): ActionReducer<any> {
   return localStorageSync({
@@ -39,10 +41,11 @@ export const appConfig: ApplicationConfig = {
         tasks: taskReducer,
         user: usersReducers,
         comments: commentsReducer,
+        projects: projectReducer,
       },
       { metaReducers }
     ),
-    provideEffects([AuthEffects, TaskEffects, UsersEffects, CommentsEffects]),
+    provideEffects([AuthEffects, TaskEffects, UsersEffects, CommentsEffects, ProjectEffects]),
     provideStoreDevtools({}),
     provideRouterStore(),
     provideFirebaseApp(() => initializeApp(environment.firebase)),

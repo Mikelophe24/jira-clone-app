@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
-import { collection, Firestore, onSnapshot } from '@angular/fire/firestore';
-import { Observable } from 'rxjs';
+import { collection, doc, Firestore, onSnapshot, updateDoc } from '@angular/fire/firestore';
+import { from, Observable } from 'rxjs';
 import { User } from './user.model';
 
 @Injectable({
@@ -28,5 +28,10 @@ export class UserService {
         }
       );
     });
+  }
+
+  updateUser(userId: string, updates: Partial<User>): Observable<void> {
+    const userDoc = doc(this.firestore, `users/${userId}`);
+    return from(updateDoc(userDoc, updates));
   }
 }

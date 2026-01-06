@@ -1,0 +1,93 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper Functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+    
+    // Users Collection
+    match /users/{userId} {
+      // Anyone authenticated can read user profiles
+      allow read: if isAuthenticated();
+      
+      // Users can only write their own profile
+      allow write: if isAuthenticated() && isOwner(userId);
+    }
+    
+    // Projects Collection
+    match /projects/{projectId} {
+      // Helper to check if user is project owner
+      function isProjectOwner() {
+        return isAuthenticated() && 
+               request.auth.uid == resource.data.ownerId;
+      }
+      
+      // Helper to check if user is project member
+      function isProjectMember() {
+        return isAuthenticated() && 
+               (request.auth.uid == resource.data.ownerId ||
+                request.auth.uid in resource.data.members);
+      }
+      
+      // Read: Owner or members can read
+      allow read: if isProjectMember();
+      
+      // Create: Any authenticated user can create a project
+      allow create: if isAuthenticated() &&
+                       request.resource.data.ownerId == request.auth.uid;
+      
+      // Update: Only owner can update project
+      allow update: if isProjectOwner();
+      
+      // Delete: Only owner can delete project
+      allow delete: if isProjectOwner();
+    }
+    
+    // Tasks Collection
+    match /tasks/{taskId} {
+      // Helper to check if user has access to the task's project
+      function hasProjectAccess() {
+        return !('projectId' in resource.data) ||
+               exists(/databases/$(database)/documents/projects/$(resource.data.projectId)) &&
+               (request.auth.uid == get(/databases/$(database)/documents/projects/$(resource.data.projectId)).data.ownerId ||
+                request.auth.uid in get(/databases/$(database)/documents/projects/$(resource.data.projectId)).data.members);
+      }
+      
+      // Read: Must be project member
+      allow read: if isAuthenticated() && hasProjectAccess();
+      
+      // Create: Any authenticated user can create tasks
+      allow create: if isAuthenticated();
+      
+      // Update: Must be project member
+      allow update: if isAuthenticated() && hasProjectAccess();
+      
+      // Delete: Must be project member
+      allow delete: if isAuthenticated() && hasProjectAccess();
+    }
+    
+    // Comments Collection
+    match /comments/{commentId} {
+      // Read: Any authenticated user
+      allow read: if isAuthenticated();
+      
+      // Create: Any authenticated user
+      allow create: if isAuthenticated() &&
+                       request.resource.data.authorId == request.auth.uid;
+      
+      // Update: Only comment author
+      allow update: if isAuthenticated() &&
+                       resource.data.authorId == request.auth.uid;
+      
+      // Delete: Only comment author
+      allow delete: if isAuthenticated() &&
+                       resource.data.authorId == request.auth.uid;
+    }
+  }
+}

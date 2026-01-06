@@ -22,5 +22,19 @@ export const usersReducers = createReducer(
     ...state,
     isLoading: false,
     error,
+  })),
+
+  // Update User
+  on(UserActions.updateUser, (state) => ({ ...state, isLoading: true })),
+  on(UserActions.updateUserSuccess, (state, { user }) => ({
+    ...state,
+    isLoading: false,
+    users: state.users.map((u) => (u.uid === user.uid ? { ...u, ...user } : u)),
+    error: null,
+  })),
+  on(UserActions.updateUserFailure, (state, { error }) => ({
+    ...state,
+    isLoading: false,
+    error,
   }))
 );

@@ -1,0 +1,181 @@
+.profile-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.profile-header {
+  margin-bottom: 2rem;
+
+  .back-button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: none;
+    border: none;
+    color: #0052cc;
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: 0.5rem 0;
+    margin-bottom: 1rem;
+    transition: color 0.2s;
+
+    &:hover {
+      color: #0065ff;
+    }
+
+    svg {
+      stroke: currentColor;
+    }
+  }
+
+  h1 {
+    font-size: 2rem;
+    font-weight: 600;
+    color: #172b4d;
+    margin: 0;
+  }
+}
+
+.profile-card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.avatar-section {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 3rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.avatar-large {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: white;
+  color: #667eea;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.info-section {
+  padding: 2rem;
+}
+
+.info-row {
+  margin-bottom: 1.5rem;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #5e6c84;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
+  }
+
+  .info-value {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 1rem;
+    color: #172b4d;
+    padding: 0.75rem 0;
+
+    &.uid {
+      font-family: 'Courier New', monospace;
+      font-size: 0.85rem;
+      color: #5e6c84;
+      word-break: break-all;
+    }
+  }
+}
+
+.edit-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: none;
+  border: 1px solid #dfe1e6;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  color: #42526e;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #f4f5f7;
+    border-color: #b3bac5;
+  }
+
+  svg {
+    stroke: currentColor;
+  }
+}
+
+.edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+
+  .name-input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid #dfe1e6;
+    border-radius: 4px;
+    font-size: 1rem;
+    transition: border-color 0.2s;
+
+    &:focus {
+      outline: none;
+      border-color: #0052cc;
+    }
+  }
+
+  .edit-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+}
+
+.btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &.btn-primary {
+    background: #0052cc;
+    color: white;
+
+    &:hover {
+      background: #0065ff;
+    }
+  }
+
+  &.btn-secondary {
+    background: #f4f5f7;
+    color: #42526e;
+
+    &:hover {
+      background: #ebecf0;
+    }
+  }
+}

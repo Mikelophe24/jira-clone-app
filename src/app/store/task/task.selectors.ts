@@ -25,16 +25,19 @@ export const selectTaskWithAssigneeInfo = createSelector(
 );
 
 export const selectTodoTasksWithAssignee = createSelector(selectTaskWithAssigneeInfo, (tasks) =>
-  tasks.filter((task) => task.status === 'To Do')
+  tasks.filter((task) => task.status === 'To Do').sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
 );
 
 export const selectInProgressTasksWithAssignee = createSelector(
   selectTaskWithAssigneeInfo,
-  (tasks) => tasks.filter((task) => task.status === 'In Progress')
+  (tasks) =>
+    tasks
+      .filter((task) => task.status === 'In Progress')
+      .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
 );
 
 export const selectDoneTasksWithAssignee = createSelector(selectTaskWithAssigneeInfo, (tasks) =>
-  tasks.filter((task) => task.status === 'Done')
+  tasks.filter((task) => task.status === 'Done').sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
 );
 
 export const selectMyTasks = createSelector(

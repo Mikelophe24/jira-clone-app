@@ -3,8 +3,7 @@ import { RouterOutlet } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { AuthActions } from './store/auth/auth.actions';
-import { selectIsLoggedIn } from './store/auth/auth.selector';
-import { selectCurrentUserProfile } from './store/user/user.selectors';
+import { selectIsLoggedIn, selectCurrentUserProfile } from './store/auth/auth.selector';
 import { UserActions } from './store/user/user.actions';
 import { CommonModule } from '@angular/common';
 
