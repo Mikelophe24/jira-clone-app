@@ -2,92 +2,71 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Helper Functions
-    function isAuthenticated() {
+    // --- HELPER FUNCTIONS ---
+    function isSignedIn() {
       return request.auth != null;
     }
     
     function isOwner(userId) {
       return request.auth.uid == userId;
     }
-    
-    // Users Collection
+    // Kiểm tra xem user có phải là Owner hoặc Member của Project không
+    function hasProjectAccess(projectId) {
+      let project = get(/databases/$(database)/documents/projects/$(projectId)).data;
+      return isSignedIn() && (
+        project.ownerId == request.auth.uid || 
+        request.auth.uid in project.members
+      );
+    }
+    // --- COLLECTIONS ---
+    // 1. Users: Cho phép xem mọi profile, nhưng chỉ chỉnh sửa profile của chính mình
     match /users/{userId} {
-      // Anyone authenticated can read user profiles
-      allow read: if isAuthenticated();
-      
-      // Users can only write their own profile
-      allow write: if isAuthenticated() && isOwner(userId);
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() && isOwner(userId);
     }
-    
-    // Projects Collection
+    // 2. Projects: Quản lý quyền truy cập dự án
     match /projects/{projectId} {
-      // Helper to check if user is project owner
-      function isProjectOwner() {
-        return isAuthenticated() && 
-               request.auth.uid == resource.data.ownerId;
-      }
+      // Chỉ owner hoặc member mới được xem project
+      allow read: if isSignedIn() && (
+        resource.data.ownerId == request.auth.uid || 
+        request.auth.uid in resource.data.members
+      );
       
-      // Helper to check if user is project member
-      function isProjectMember() {
-        return isAuthenticated() && 
-               (request.auth.uid == resource.data.ownerId ||
-                request.auth.uid in resource.data.members);
-      }
+      // Bất kỳ ai login cũng có thể tạo project mới (họ sẽ thành owner)
+      allow create: if isSignedIn() && request.resource.data.ownerId == request.auth.uid;
       
-      // Read: Owner or members can read
-      allow read: if isProjectMember();
-      
-      // Create: Any authenticated user can create a project
-      allow create: if isAuthenticated() &&
-                       request.resource.data.ownerId == request.auth.uid;
-      
-      // Update: Only owner can update project
-      allow update: if isProjectOwner();
-      
-      // Delete: Only owner can delete project
-      allow delete: if isProjectOwner();
+      // Chỉ owner mới có quyền cập nhật hoặc xóa project
+      allow update, delete: if isSignedIn() && resource.data.ownerId == request.auth.uid;
     }
-    
-    // Tasks Collection
+    // 3. Tasks: Ràng buộc chặt chẽ với dự án
     match /tasks/{taskId} {
-      // Helper to check if user has access to the task's project
-      function hasProjectAccess() {
-        return !('projectId' in resource.data) ||
-               exists(/databases/$(database)/documents/projects/$(resource.data.projectId)) &&
-               (request.auth.uid == get(/databases/$(database)/documents/projects/$(resource.data.projectId)).data.ownerId ||
-                request.auth.uid in get(/databases/$(database)/documents/projects/$(resource.data.projectId)).data.members);
+      // Quy chuẩn: Nếu task có projectId, phải kiểm tra quyền trong project đó
+      allow read: if isSignedIn() && (
+        !('projectId' in resource.data) || hasProjectAccess(resource.data.projectId)
+      );
+      
+      // Khi tạo task: Phải gán vào dự án mà mình có quyền member
+      allow create: if isSignedIn() && (
+        !('projectId' in request.resource.data) || hasProjectAccess(request.resource.data.projectId)
+      );
+      
+      // Khi sửa/xóa task: Phải là member của dự án đó
+      allow update, delete: if isSignedIn() && (
+        !('projectId' in resource.data) || hasProjectAccess(resource.data.projectId)
+      );
+      // 4. Comments (Sub-collection bên trong Task)
+      // Khớp với Service: collection(this.fireStore, `tasks/${taskId}/comments`)
+      match /comments/{commentId} {
+        // Chỉ member của project chứa task này mới được xem/viết comment
+        allow read: if isSignedIn() && hasProjectAccess(get(/databases/$(database)/documents/tasks/$(taskId)).data.projectId);
+        
+        allow create: if isSignedIn() && 
+          request.resource.data.authorId == request.auth.uid &&
+          hasProjectAccess(get(/databases/$(database)/documents/tasks/$(taskId)).data.projectId);
+        
+        // Chỉ tác giả comment mới được sửa/xóa
+        allow update, delete: if isSignedIn() && resource.data.authorId == request.auth.uid;
       }
-      
-      // Read: Must be project member
-      allow read: if isAuthenticated() && hasProjectAccess();
-      
-      // Create: Any authenticated user can create tasks
-      allow create: if isAuthenticated();
-      
-      // Update: Must be project member
-      allow update: if isAuthenticated() && hasProjectAccess();
-      
-      // Delete: Must be project member
-      allow delete: if isAuthenticated() && hasProjectAccess();
-    }
-    
-    // Comments Collection
-    match /comments/{commentId} {
-      // Read: Any authenticated user
-      allow read: if isAuthenticated();
-      
-      // Create: Any authenticated user
-      allow create: if isAuthenticated() &&
-                       request.resource.data.authorId == request.auth.uid;
-      
-      // Update: Only comment author
-      allow update: if isAuthenticated() &&
-                       resource.data.authorId == request.auth.uid;
-      
-      // Delete: Only comment author
-      allow delete: if isAuthenticated() &&
-                       resource.data.authorId == request.auth.uid;
     }
   }
 }

@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 
@@ -12,16 +12,19 @@ import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
 import { AddEditTaskComponent } from '../add-edit-task/add-edit-task';
 import {
-  selectDoneTasksWithAssignee,
-  selectInProgressTasksWithAssignee,
-  selectMyTasks,
-  selectTodoTasksWithAssignee,
+  selectDoneTasksByCurrentProject,
+  selectInProgressTasksByCurrentProject,
+  selectMyDoneTasksByCurrentProject,
+  selectMyInProgressTasksByCurrentProject,
+  selectMyTodoTasksByCurrentProject,
+  selectTodoTasksByCurrentProject,
 } from '../../store/task/task.selectors';
 import { selectAllUsers } from '../../store/user/user.selectors';
 import { selectCurrentProject } from '../../store/project/project.selectors';
 import { User } from '../../store/user/user.model';
 import { Project } from '../../store/project/project.model';
 import { FormsModule } from '@angular/forms';
+import { calculateNewOrder } from '../../utils/drag-drop.utils';
 
 @Component({
   selector: 'app-kanban-board',
@@ -29,6 +32,7 @@ import { FormsModule } from '@angular/forms';
   imports: [TaskCard, DragDropModule, CommonModule, AddEditTaskComponent, FormsModule],
   templateUrl: './kanban-board.html',
   styleUrl: './kanban-board.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class KanbanBoard implements OnInit {
   private store = inject(Store);
@@ -44,46 +48,28 @@ export class KanbanBoard implements OnInit {
   users$: Observable<User[]> = this.store.select(selectAllUsers);
 
   // Filter tasks by current project
-  allTodoTasks$: Observable<TaskWithAssignee[]> = combineLatest([
-    this.store.select(selectTodoTasksWithAssignee),
-    this.projectId$,
-  ]).pipe(map(([tasks, projectId]) => tasks.filter((task) => task.projectId === projectId)));
-
-  allInProgressTasks$: Observable<TaskWithAssignee[]> = combineLatest([
-    this.store.select(selectInProgressTasksWithAssignee),
-    this.projectId$,
-  ]).pipe(map(([tasks, projectId]) => tasks.filter((task) => task.projectId === projectId)));
-
-  allDoneTasks$: Observable<TaskWithAssignee[]> = combineLatest([
-    this.store.select(selectDoneTasksWithAssignee),
-    this.projectId$,
-  ]).pipe(map(([tasks, projectId]) => tasks.filter((task) => task.projectId === projectId)));
-
-  myTodoTasks$: Observable<TaskWithAssignee[]> = combineLatest([
-    this.store.select(selectMyTasks),
-    this.projectId$,
-  ]).pipe(
-    map(([tasks, projectId]) =>
-      tasks.filter((t) => t.status === 'To Do' && t.projectId === projectId)
-    )
+  allTodoTasks$: Observable<TaskWithAssignee[]> = this.store.select(
+    selectTodoTasksByCurrentProject
   );
 
-  myInProgressTasks$: Observable<TaskWithAssignee[]> = combineLatest([
-    this.store.select(selectMyTasks),
-    this.projectId$,
-  ]).pipe(
-    map(([tasks, projectId]) =>
-      tasks.filter((t) => t.status === 'In Progress' && t.projectId === projectId)
-    )
+  allInProgressTasks$: Observable<TaskWithAssignee[]> = this.store.select(
+    selectInProgressTasksByCurrentProject
   );
 
-  myDoneTasks$: Observable<TaskWithAssignee[]> = combineLatest([
-    this.store.select(selectMyTasks),
-    this.projectId$,
-  ]).pipe(
-    map(([tasks, projectId]) =>
-      tasks.filter((t) => t.status === 'Done' && t.projectId === projectId)
-    )
+  allDoneTasks$: Observable<TaskWithAssignee[]> = this.store.select(
+    selectDoneTasksByCurrentProject
+  );
+
+  myTodoTasks$: Observable<TaskWithAssignee[]> = this.store.select(
+    selectMyTodoTasksByCurrentProject
+  );
+
+  myInProgressTasks$: Observable<TaskWithAssignee[]> = this.store.select(
+    selectMyInProgressTasksByCurrentProject
+  );
+
+  myDoneTasks$: Observable<TaskWithAssignee[]> = this.store.select(
+    selectMyDoneTasksByCurrentProject
   );
 
   // Filters UI State
@@ -262,7 +248,7 @@ export class KanbanBoard implements OnInit {
 
     // Case 1: Reordering within the same column
     if (event.previousContainer === event.container) {
-      const newOrder = this.calculateNewOrder(targetTasks, event.currentIndex, task.id);
+      const newOrder = calculateNewOrder(targetTasks, event.currentIndex, task.id);
 
       this.store.dispatch(
         TaskActions.updateTask({
@@ -278,7 +264,7 @@ export class KanbanBoard implements OnInit {
     // Case 2: Moving to a different column
     const newStatus = this.getColumnStatus(event.container.id);
     if (newStatus) {
-      const newOrder = this.calculateNewOrder(targetTasks, event.currentIndex);
+      const newOrder = calculateNewOrder(targetTasks, event.currentIndex);
 
       this.store.dispatch(
         TaskActions.updateTask({
@@ -290,46 +276,6 @@ export class KanbanBoard implements OnInit {
         })
       );
     }
-  }
-
-  /**
-   * Calculate new order value for a task using fractional indexing
-   * This allows infinite insertions without updating all tasks
-   *
-   * @param tasks - Array of tasks in the target column (sorted by order)
-   * @param targetIndex - Index where the task is being dropped
-   * @param excludeTaskId - ID of task being moved (to exclude from calculation in same-column reorder)
-   * @returns New order value
-   */
-  private calculateNewOrder(
-    tasks: TaskWithAssignee[],
-    targetIndex: number,
-    excludeTaskId?: string
-  ): number {
-    // Filter out the task being moved (for same-column reorder)
-    const filteredTasks = excludeTaskId ? tasks.filter((t) => t.id !== excludeTaskId) : tasks;
-
-    // If dropping into an empty list
-    if (filteredTasks.length === 0) {
-      return 1000;
-    }
-
-    // If dropping at the beginning
-    if (targetIndex === 0) {
-      const firstOrder = filteredTasks[0]?.order ?? 1000;
-      return firstOrder - 1000;
-    }
-
-    // If dropping at the end
-    if (targetIndex >= filteredTasks.length) {
-      const lastOrder = filteredTasks[filteredTasks.length - 1]?.order ?? 0;
-      return lastOrder + 1000;
-    }
-
-    // If dropping in the middle - use average of surrounding tasks
-    const prevOrder = filteredTasks[targetIndex - 1]?.order ?? 0;
-    const nextOrder = filteredTasks[targetIndex]?.order ?? prevOrder + 2000;
-    return (prevOrder + nextOrder) / 2;
   }
 
   private getColumnStatus(columnId: string): 'To Do' | 'In Progress' | 'Done' | null {
